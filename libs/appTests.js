@@ -1,4 +1,4 @@
-import { newElement } from './ui.js';
+import { newElement } from '/libs/ui.js';
 
 function appTests() {
   const el = newElement({ class:"border-2 border-green-500 m-1.5 p-1.5 rounded-md" });
