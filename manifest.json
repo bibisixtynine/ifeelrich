@@ -1,0 +1,17 @@
+{
+    "theme_color": "#000000",
+    "background_color": "#000000",
+    "display": "fullscreen",
+    "scope": "/",
+    "start_url": "/",
+    "name": "ifeelrich",
+    "short_name": "ifeelrich",
+    "description": "the super cool personnal money manager !",
+    "icons": [
+        {
+            "src": "ifeelrich.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        }
+    ]
+}
