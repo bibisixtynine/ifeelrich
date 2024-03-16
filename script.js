@@ -1,4 +1,4 @@
-const jsonN26 = csvToJson(`
+const N26Operations = csvToObject(`
 "Date","Bénéficiaire","Numéro de compte","Type de transaction","Référence de paiement","Montant (EUR)","Montant (Devise étrangère)","Sélectionnez la devise étrangère","Taux de conversion"
 "2024-01-01","STACKBLITZ","","Paiement par MasterCard","-","-8.15","-9.0","USD","0.9055555556"
 "2024-01-01","Revolut**1097*","","Paiement par MasterCard","-","-200.0","-200.0","EUR","1.0"
@@ -89,30 +89,150 @@ const jsonN26 = csvToJson(`
 "2024-03-15","REPLIT, INC.","","Paiement par MasterCard","-","-18.38","-20.0","USD","0.919"`)
 .reverse()
 
-function csvToJson(csv) {
-  const lines = csv.split("\n");
 
-  // Assume la première ligne contient les en-têtes
-  const keys = lines[1].split(",");
-  const result = [];
-  for(let i = 2; i < lines.length; i++) {
-    const obj = {};
-    const currentline = lines[i].match(/("[^"]+"|[^,]+)/g).map(field => field.replace(/^"|"$/g, ''));
-    for(let j = 0; j < keys.length; j++) {
-      const key = keys[j].replace(/"/g, '')
-      const value = currentline[j].replace(/"/g, '')
-      obj[key] = value;
+//////////////////////////////////////////////////////////////////////
+//
+// some tests
+//
+const el = newElement({ border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px" });
+el.appendChild( newElement( {contentEditable:"true", display:"inline-block", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text:"Hello World"} ))
+el.appendChild( newElement( {contentEditable:"true", display:"inline-block", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text:"Hello World"} ))
+document.body.appendChild(el)
+
+for (i=0; i<10; i++) 
+  document.body.appendChild(newElement())
+//
+// some tests
+//
+//////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// operations table generation from json
+//
+const operations = [];
+const operation = {date: formatDate(new Date()), name:"toto", amount: 0, description: ""}
+
+  N26Operations.forEach((n26Operation, index) => {
+  const curentOperation = {amount: parseFloat(n26Operation['Montant (EUR)']), description: n26Operation['Bénéficiaire'], date: n26Operation['Date']}
+  operations.push(curentOperation);
+})
+//
+// operations table generation
+//
+//////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// UI - 1) top div : current balance
+//
+const totalEl = newElement({fontSize:"30px",borderRadius:"5px", border:"2px solid ivory", margin:"5px", padding:"5px"})
+totalEl.innerText = "0.00"
+document.body.appendChild(totalEl)
+//
+// top div : current balance
+//
+//////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// UI - 2) operations div
+//
+operations.forEach((currentOperation, index) => {
+  totalEl.innerText = (parseFloat(totalEl.innerText) + parseFloat(currentOperation.amount)).toFixed(2);
+
+  const blockEl = newElement({ border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px" });
+  document.body.appendChild(blockEl)
+
+  // amount
+  const amount = currentOperation.amount.toFixed(2)
+  let amountEl
+  if (amount<0)
+    amountEl = newElement({fontWeight:"100", display:"inline-block" ,contentEditable:"true", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text: amount});
+  else
+    amountEl = newElement({fontWeight:"800", color: "black", backgroundColor: "lime", display:"inline-block" ,contentEditable:"true", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text: amount});
+
+    
+  blockEl.appendChild(amountEl)  
+  amountEl.addEventListener('input', function() {
+    const newAmount = parseFloat(this.innerText) ? parseFloat(this.innerText) : 0;
+    const oldAmount = parseFloat(currentOperation.amount) ? parseFloat(currentOperation.amount) : 0;
+    const diff = newAmount - oldAmount;
+    if (diff) 
+      totalEl.innerText = (parseFloat(totalEl.innerText) + diff).toFixed(2);
+    if (parseFloat(this.innerText)>0) {
+      this.style.backgroundColor = "lime"
+      this.style.color = "black"
+      this.style.fontWeight = "800"
+    } else {
+      this.style.backgroundColor = "black"
+      this.style.color = "ivory"
+      this.style.fontWeight = "100"
     }
-    result.push(obj);
+    currentOperation.amount = this.innerText;
+  });
+
+  // description
+  const descriptionEl = newElement({display:"inline-block" ,contentEditable:"true", border:"2px solid lime" ,margin:"5px", padding:"5px", borderRadius:"5px", text: currentOperation.description})
+  blockEl.appendChild(descriptionEl)
+
+  // date
+  const dateEl = newElement({display:"inline-block" ,contentEditable:"true", border:"2px solid" ,margin:"5px", padding:"5px", borderRadius:"5px", text: currentOperation.date})
+  blockEl.appendChild(dateEl)
+
+});
+//
+// operations div
+//
+//////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// UI - 3) bottom div : initial balance
+//
+let initialBalance = 619.78;
+const initialBalanceEl = newElement({contentEditable:"true", fontSize:"30px",borderRadius:"5px", border:"2px solid ivory", margin:"5px", padding:"5px"})
+initialBalanceEl.innerText = initialBalance.toFixed(2)
+totalEl.innerText = (parseFloat(totalEl.innerText) + initialBalance).toFixed(2);
+document.body.appendChild(initialBalanceEl)
+initialBalanceEl.addEventListener('input', function() {
+  const newAmount = parseFloat(this.innerText) ? parseFloat(this.innerText) : 0;
+  const oldAmount = initialBalance
+  const diff = newAmount - oldAmount;
+  if (diff) {
+    totalEl.innerText = (parseFloat(totalEl.innerText) + diff).toFixed(2);
+    initialBalance = newAmount;
+  }  
+  if (parseFloat(this.innerText)>0) {
+    this.style.backgroundColor = "lime"
+    this.style.color = "black"
+    this.style.fontWeight = "800"
+  } else {
+    this.style.backgroundColor = "black"
+    this.style.color = "ivory"
+    this.style.fontWeight = "100"
   }
+});
+//
+// bottom div : initial balance
+//
+//////////////////////////////////////////////////////////////////////
 
-  // Convertir en JSON
-  return result;
+
+//////////////////////////////////////////////////////////////////////
+//
+// Tools
+//
+function formatDate(date) {
+  let day = date.getDate().toString().padStart(2, '0');
+  let month = (date.getMonth() + 1).toString().padStart(2, '0');
+  let year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 }
-
-
-
-
 
 function randomName() {
   const names = ['Alice', 'Bob', 'Charlie', 'Diana', 'Evan', 'Fiona', 'George', 'Hannah', 'Ian', 'Julia', 'Kevin', 'Luna', 'Mason', 'Nora', 'Oliver', 'Piper', 'Quinn', 'Ryan', 'Sophia', 'Tyler', 'Uma', 'Violet', 'Wesley', 'Xander', 'Yara', 'Zane', 'Aaron', 'Beth', 'Caleb', 'Daisy', 'Eli'];
@@ -123,6 +243,32 @@ function randomDescription() {
   const descriptions = ['is a loyal dog', 'is a friendly cat', 'is a smart bird', 'is a playful fish', 'is a curious hamster', 'is a sweet turtle', 'is a brave lion', 'is a kind owl', 'is a clever monkey', 'is a smart panda', 'is a playful koala', 'is a friendly dolphin', 'is a curious penguin', 'is a sweet tiger', 'is a brave elephant', 'is a kind giraffe', 'is a clever kangaroo', 'is a smart pig', 'is a playful platypus', 'is a friendly seal', 'is a curious dolphin', 'is a sweet tiger', 'is a brave elephant', 'is a kind giraffe', 'is a clever kangaroo', 'is a smart pig', 'is a playful platypus', 'is a friendly seal', 'is a curious dolphin', 'is a sweet tiger']
   return descriptions[Math.floor(Math.random() * descriptions.length)];
 }
+
+function csvToObject(csv) {
+  const lines = csv.split("\n");
+  // Assume la première ligne contient les en-têtes
+  const keys = lines[1].split(",");
+  const result = [];
+  for(let i = 2; i < lines.length; i++) {
+    const obj = {};
+    const currentline = lines[i].match(/("[^"]+"|[^,]+)/g).map(field => field.replace(/^"|"$/g, ''));
+    for(let j = 0; j < keys.length; j++) {
+      try {
+      const key = keys[j].replace(/"/g, '')
+      const value = currentline[j].replace(/"/g, '')
+      obj[key] = value;
+      } catch(e) {
+        console.log(e)
+        debugger
+      }
+    }
+    result.push(obj);
+  }
+
+  // Convertir en JSON
+  return result;
+}
+
 
 function newElement(options = {border:"1px solid red", text:"Hello World", random: true}) {
   const div = document.createElement('div');
@@ -168,7 +314,7 @@ function newElement(options = {border:"1px solid red", text:"Hello World", rando
     if (options.opacity) div.style.opacity = options.opacity;
     if (options.display) div.style.display = options.display;
     if (options.contentEditable) div.contentEditable = options.contentEditable;
-    
+
   } else {
     div.style.border = "1px solid red";
     div.innerText = randomName();
@@ -184,85 +330,10 @@ function newElement(options = {border:"1px solid red", text:"Hello World", rando
     div.style.display = "inline-block";
     div.contentEditable = "true";
   }
-  
+
   return div;
 }
-
-var el = newElement({ border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px" });
-el.appendChild( newElement( {contentEditable:"true", display:"inline-block", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text:"Hello World"} ))
-el.appendChild( newElement( {contentEditable:"true", display:"inline-block", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text:"Hello World"} ))
-document.body.appendChild(el)
-
-
-for (i=0; i<10; i++) 
-  document.body.appendChild(newElement())
-
-
-var operations = [];
-
-function formatDate(date) {
-  let day = date.getDate().toString().padStart(2, '0');
-  let month = (date.getMonth() + 1).toString().padStart(2, '0');
-  let year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
-var operation = {date: formatDate(new Date()), name:"toto", amount: 0, description: ""}
-
-var totalEl = newElement({fontSize:"30px",borderRadius:"5px", border:"2px solid ivory", margin:"5px", padding:"5px"})
-totalEl.innerText = "0.00"
-document.body.appendChild(totalEl)
-
-
-jsonN26.forEach((n26Operation, index) => {
-  const curentOperation = {amount: parseFloat(n26Operation['Montant (EUR)']), description: n26Operation['Bénéficiaire'], date: n26Operation['Date']}
-  operations.push(curentOperation);
-})
-
-// Generate divs for each operation and handle input events
-operations.forEach((currentOperation, index) => {
-  totalEl.innerText = (parseFloat(totalEl.innerText) + parseFloat(currentOperation.amount)).toFixed(2);
-
-  const blockEl = newElement({ border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px" });
-  document.body.appendChild(blockEl)
-
-  // amount
-  const amount = currentOperation.amount.toFixed(2)
-  let amountEl
-  if (amount<0)
-    amountEl = newElement({fontWeight:"100", display:"inline-block" ,contentEditable:"true", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text: amount});
-  else
-    amountEl = newElement({fontWeight:"800", color: "black", backgroundColor: "lime", display:"inline-block" ,contentEditable:"true", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text: amount});
-
-    
-  blockEl.appendChild(amountEl)  
-  amountEl.addEventListener('input', function() {
-    var newAmount = parseFloat(this.innerText) ? parseFloat(this.innerText) : 0;
-    var oldAmount = parseFloat(currentOperation.amount) ? parseFloat(currentOperation.amount) : 0;
-    var diff = newAmount - oldAmount;
-    if (diff) 
-      totalEl.innerText = parseFloat(totalEl.innerText) + diff;
-    if (parseFloat(this.innerText)>0) {
-      this.style.backgroundColor = "lime"
-      this.style.color = "black"
-      this.style.fontWeight = "800"
-    } else {
-      this.style.backgroundColor = "black"
-      this.style.color = "ivory"
-      this.style.fontWeight = "100"
-    }
-    currentOperation.amount = this.innerText;
-  });
-
-  // description
-  const descriptionEl = newElement({display:"inline-block" ,contentEditable:"true", border:"2px solid lime" ,margin:"5px", padding:"5px", borderRadius:"5px", text: currentOperation.description})
-  blockEl.appendChild(descriptionEl)
-
-  // date
-  const dateEl = newElement({display:"inline-block" ,contentEditable:"true", border:"2px solid" ,margin:"5px", padding:"5px", borderRadius:"5px", text: currentOperation.date})
-  blockEl.appendChild(dateEl)
-
-});
-
-
-
+//
+// Tools
+//
+//////////////////////////////////////////////////////////////////////
