@@ -1,9 +1,9 @@
 import { newElement } from './ui.js';
 
 function appTests() {
-  const el = newElement({ border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px" });
-  el.appendChild( newElement( {contentEditable:"true", display:"inline-block", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text:"Hello World"} ))
-  el.appendChild( newElement( {contentEditable:"true", display:"inline-block", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text:"Hello World"} ))
+  const el = newElement({ class:"border-2 border-green-500 m-1.5 p-1.5 rounded-md" });
+  el.appendChild( newElement( {contentEditable:"true", text:"Hello World", class:"inline-block border-2 border-green-500 m-1 p-1 rounded-md bg-black"} ))
+  el.appendChild( newElement( {contentEditable:"true", text:"Hello World", class:"inline-block border-2 border-green-500 m-1 p-1 rounded-md bg-black"} ))
   document.body.appendChild(el)
 
   for (let i=0; i<10; i++) 

@@ -13,6 +13,35 @@ appTests()
 //
 //////////////////////////////////////////////////////////////////////
 
+class App {
+  constructor() {
+    this.n26 = new N26()
+    this.ui = {}
+    this.operations = []
+    this.initialBalance = 619.78
+    this.initialBalanceEl = newElement({
+      contentEditable: true,
+      display: 'inline-block',
+      border: '2px solid lime',
+      margin: '5px',
+      padding: '5px',
+      borderRadius: '5px',
+      text: this.initialBalance
+    })
+    this.ui.initialBalanceEl = this.initialBalanceEl
+    this.totalEl = newElement({
+      contentEditable: true,
+      display: 'inline-block',
+      border: '2px solid lime',
+      margin: '5px',
+      padding: '5px',
+      borderRadius: '5px',
+      text: this.initialBalance
+    })
+  }
+}
+
+
 const operations = [];
 const ui = {}
 let initialBalance = 619.78;
@@ -30,7 +59,6 @@ let initialBalance = 619.78;
     operations.push(curentOperation);
   })
 }
-
 //
 // {operations} table generation
 //
@@ -41,7 +69,7 @@ let initialBalance = 619.78;
 //
 // UI - 1) top div : current balance
 //
-ui.totalEl = newElement({fontSize:"30px",borderRadius:"5px", border:"2px solid ivory", margin:"5px", padding:"5px"})
+ui.totalEl = newElement({class:"text-3xl rounded border-2 border-white m-1 p-1"})
 ui.totalEl.innerText = "0.00"
 document.body.appendChild(ui.totalEl)
 //
@@ -57,20 +85,24 @@ document.body.appendChild(ui.totalEl)
 operations.forEach((currentOperation) => {
   ui.totalEl.innerText = (parseFloat(ui.totalEl.innerText) + parseFloat(currentOperation.amount)).toFixed(2);
 
-  const blockEl = newElement({ class:"operationBlock", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px" });
+  const blockEl = newElement({ class:"operationBlock border-2 border-green-500 m-1.5 p-1.5 rounded-md"});
   document.body.appendChild(blockEl)
 
   // 1) date
-  const dateEl = newElement({display:"inline-block" ,contentEditable:"true", border:"2px solid" ,margin:"5px", padding:"5px", borderRadius:"5px", text: currentOperation.date})
+  const dateEl = newElement({
+    class: "inline-block border-2 m-1 p-1 rounded-md", // Tailwind CSS classes
+    contentEditable: "true", // Setting the contentEditable attribute
+    text: currentOperation.date // Setting the text content of the element
+  });  
   blockEl.appendChild(dateEl)
   
   // 2) amount
   const amount = currentOperation.amount.toFixed(2)
   let amountEl
   if (amount<0)
-    amountEl = newElement({fontWeight:"100", display:"inline-block" ,contentEditable:"true", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text: amount});
+    amountEl = newElement({contentEditable:"true",  text: amount, class:"inline-block border-2 border-green-500 m-1 p-1 rounded-md bg-black text-white font-thin"});
   else
-    amountEl = newElement({fontWeight:"800", color: "black", backgroundColor: "lime", display:"inline-block" ,contentEditable:"true", border:"2px solid lime", margin:"5px", padding:"5px", borderRadius:"5px", text: amount});
+    amountEl = newElement({contentEditable:"true",  text: amount, class:"inline-block border-2 border-green-500 m-1 p-1 rounded-md bg-green-500 text-black font-bold"});
 
   blockEl.appendChild(amountEl)  
 
@@ -81,19 +113,16 @@ operations.forEach((currentOperation) => {
     if (diff) 
       ui.totalEl.innerText = (parseFloat(ui.totalEl.innerText) + diff).toFixed(2);
     if (parseFloat(this.innerText)>0) {
-      this.style.backgroundColor = "lime"
-      this.style.color = "black"
-      this.style.fontWeight = "800"
+      this.className = "inline-block border-2 border-green-500 m-1 p-1 rounded-md bg-green-500 text-black font-bold"
     } else {
-      this.style.backgroundColor = "black"
-      this.style.color = "ivory"
-      this.style.fontWeight = "100"
+      this.className = "inline-block border-2 border-green-500 m-1 p-1 rounded-md bg-black text-white font-thin"
+
     }
     currentOperation.amount = this.innerText;
   });
 
   // 3) description
-  const descriptionEl = newElement({display:"inline-block" ,contentEditable:"true", border:"2px solid lime" ,margin:"5px", padding:"5px", borderRadius:"5px", text: currentOperation.description})
+  const descriptionEl = newElement({contentEditable:"true", class:"inline-block border-2 border-green-400 m-1 p-1 rounded-md" , text: currentOperation.description})
   blockEl.appendChild(descriptionEl)
 
 });
@@ -107,7 +136,7 @@ operations.forEach((currentOperation) => {
 //
 // UI - 3) bottom div : initial balance
 //
-ui.initialBalanceEl = newElement({contentEditable:"true", fontSize:"30px",borderRadius:"5px", border:"2px solid ivory", margin:"5px", padding:"5px"})
+ui.initialBalanceEl = newElement({contentEditable:"true", class:"text-3xl rounded border-2 border-white m-1 p-1"})
 ui.initialBalanceEl.innerText = initialBalance.toFixed(2)
 ui.totalEl.innerText = (parseFloat(ui.totalEl.innerText) + initialBalance).toFixed(2);
 document.body.appendChild(ui.initialBalanceEl)
@@ -119,90 +148,10 @@ ui.initialBalanceEl.addEventListener('input', function() {
     ui.totalEl.innerText = (parseFloat(ui.totalEl.innerText) + diff).toFixed(2);
     initialBalance = newAmount;
   }  
-  if (parseFloat(this.innerText)>0) {
-    this.style.backgroundColor = "lime"
-    this.style.color = "black"
-    this.style.fontWeight = "800"
-  } else {
-    this.style.backgroundColor = "black"
-    this.style.color = "ivory"
-    this.style.fontWeight = "100"
-  }
+
 });
 //
 // bottom div : initial balance
 //
 //////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// Tools
-//
-function formatDate(date) {
-  let day = date.getDate().toString().padStart(2, '0');
-  let month = (date.getMonth() + 1).toString().padStart(2, '0');
-  let year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
-
-
-/*
-function isVisible(elem) {
-    if (!(elem instanceof Element)) throw Error('DomUtil: elem is not an element.');
-    const style = getComputedStyle(elem);
-    if (style.display === 'none') return false;
-    if (style.visibility !== 'visible') return false;
-    if (style.opacity < 0.1) return false;
-    if (elem.offsetWidth + elem.offsetHeight + elem.getBoundingClientRect().height +
-        elem.getBoundingClientRect().width === 0) {
-        return false;
-    }
-    const elemCenter   = {
-        x: elem.getBoundingClientRect().left + elem.offsetWidth / 2,
-        y: elem.getBoundingClientRect().top + elem.offsetHeight / 2
-    };
-    if (elemCenter.x < 0) return false;
-    if (elemCenter.x > (document.documentElement.clientWidth || window.innerWidth)) return false;
-    if (elemCenter.y < 0) return false;
-    if (elemCenter.y > (document.documentElement.clientHeight || window.innerHeight)) return false;
-    let pointContainer = document.elementFromPoint(elemCenter.x, elemCenter.y);
-    do {
-        if (pointContainer === elem) return true;
-    } while (pointContainer = pointContainer.parentNode);
-    return false;
-}
-
-function getHighestVisibleDivInfo() {
-  // Cible uniquement les div avec la classe 'operationBlock'
-  const allDivs = document.querySelectorAll('div.operationBlock');
-  let highestDivInfo = null;
-  allDivs.forEach((div) => {
-      if (isVisible(div)) {
-          const rect = div.getBoundingClientRect();
-          if (highestDivInfo === null || rect.top < highestDivInfo.position.top) {
-              highestDivInfo = {element: div, position: {top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left}};
-          }
-      }
-  });
-  return highestDivInfo;
-}
-// Exemple d'utilisation
-let toogle = true
-setInterval(()=>{
-  const highestVisibleDivInfo = getHighestVisibleDivInfo();
-  console.log(highestVisibleDivInfo)
-  toogle = !toogle
-  if (toogle)
-    highestVisibleDivInfo.element.style.backgroundColor = "red"
-  else
-    highestVisibleDivInfo.element.style.backgroundColor = "black"
-  //
-},1000)
-const highestVisibleDivInfo = getHighestVisibleDivInfo();
-*/
-//
-// Tools
-//
-//////////////////////////////////////////////////////////////////////
