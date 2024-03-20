@@ -1,3 +1,4 @@
+/*
 // Classe Object racine intégrant un proxy pour filtrer tous les appels à une méthode d'une classe fille
 // exemple d'usage
 class C1 extends Object {
@@ -66,3 +67,4 @@ instance.greet();
 // Utiliser le proxy à travers l'instance
 instance.proxy.greet();  
 instance.proxy.nonExistentMethod();  // Cela affichera "Tentative d'appel d'une fonction non existante : nonExistentMethod".
+*/
